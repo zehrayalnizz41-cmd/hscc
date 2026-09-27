@@ -1,0 +1,4 @@
+v 3
+d HSCC: Heterogeneous-Slope SCC estimator
+d Joint partial-pooling heterogeneous slopes with HC3 Driscoll-Kraay inference
+p hscc Heterogeneous-Slope SCC estimator

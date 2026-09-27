@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated manuscript when available."
+title: "HSCC for Stata"
+version: "1.0.1"
+date-released: "2026-09-27"
+type: software
+authors:
+  - family-names: "Yalnız"
+    given-names: "Zehra"
+repository-code: "TO BE ADDED"
