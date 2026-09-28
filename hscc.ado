@@ -150,6 +150,9 @@ program define hscc, eclass sortpreserve
     ereturn display, level(95)
 
     if "`timefe'" != "" {
+        tempname __hscc_tfdisp
+        matrix `__hscc_tfdisp' = e(timefe_b)
+
         di
         di as txt "Common time fixed effects (centered; mean-zero normalization)"
         di as txt "{hline 36}"
@@ -158,7 +161,7 @@ program define hscc, eclass sortpreserve
 
         forvalues j = 1/`Tdim' {
             local __tv : word `j' of `__hscc_timevals'
-            di as txt "`__tv'" _col(21) as res %12.6f el(HSCC_TIMEFE,1,`j')
+            di as txt "`__tv'" _col(21) as res %12.6f el(`__hscc_tfdisp',1,`j')
         }
 
         di as txt "{hline 36}"
