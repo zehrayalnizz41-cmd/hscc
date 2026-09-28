@@ -55,6 +55,8 @@ program define hscc, eclass sortpreserve
     quietly levelsof `panelvar' if `touse', local(__hscc_ids)
     local Ng : word count `__hscc_ids'
 
+    quietly levelsof `timevar' if `touse', local(__hscc_timevals)
+
     if `Ng' < 2 {
         di as err "hscc requires at least two panel units"
         exit 459
@@ -92,6 +94,14 @@ program define hscc, eclass sortpreserve
     matrix colnames HSCC_V = `indepvars'
     matrix colnames HSCC_MG = `indepvars'
 
+    if "`timefe'" != "" {
+        local __hscc_tfcols
+        forvalues j = 1/`Tdim' {
+            local __hscc_tfcols "`__hscc_tfcols' t`j'"
+        }
+        matrix colnames HSCC_TIMEFE = `__hscc_tfcols'
+    }
+
     ereturn post HSCC_B HSCC_V, obs(`Nobs') depname(`depvar')
 
     ereturn scalar N_g = `Ng'
@@ -102,6 +112,11 @@ program define hscc, eclass sortpreserve
     ereturn scalar r2_w = scalar(HSCC_R2W)
 
     ereturn matrix mg_b = HSCC_MG
+
+    if "`timefe'" != "" {
+        ereturn matrix timefe_b = HSCC_TIMEFE
+        ereturn local timefe_normalization "centered_mean_zero"
+    }
 
     ereturn local cmd "hscc"
     ereturn local cmdline `"hscc `0'"'
@@ -133,6 +148,22 @@ program define hscc, eclass sortpreserve
     di
 
     ereturn display, level(95)
+
+    if "`timefe'" != "" {
+        di
+        di as txt "Common time fixed effects (centered; mean-zero normalization)"
+        di as txt "{hline 36}"
+        di as txt "Time" _col(21) "Effect"
+        di as txt "{hline 36}"
+
+        forvalues j = 1/`Tdim' {
+            local __tv : word `j' of `__hscc_timevals'
+            di as txt "`__tv'" _col(21) as res %12.6f el(HSCC_TIMEFE,1,`j')
+        }
+
+        di as txt "{hline 36}"
+        di as txt "Stored in e(timefe_b)"
+    }
 end
 
 
@@ -156,8 +187,8 @@ void hscc__estimate(
 
     real matrix Vi_store, Vi, Qinv, Hdiag, PSI, G0
 
-    real matrix D, Pmat, H, Hinv, PenEta, invEig
-    real colvector YcAll, theta, resid, lev, resid3
+    real matrix D, Dpre, Pmat, H, Hinv, PenEta, invEig
+    real colvector YcAll, YcPre, theta, resid, lev, resid3, timeeff
 
     real scalar NN, TT, KK, g, Tg, q, k, j
     real scalar pGamma, pEta, pTot
@@ -384,6 +415,13 @@ void hscc__estimate(
     }
 
     /*
+     * Preserve the one-way within-transformed joint system so that
+     * common time effects can be recovered after FWL estimation.
+     */
+    Dpre  = D
+    YcPre = YcAll
+
+    /*
      * 4b. Optional common time fixed effects
      *
      * Residualize the complete joint design and the within-transformed
@@ -433,6 +471,22 @@ void hscc__estimate(
     theta = Hinv*quadcross(D,YcAll)
 
     BHSCC = theta[1..KK]'
+
+    /*
+     * Recover common time fixed effects after FWL estimation.
+     *
+     * With unit effects already removed, lambda_t is recovered as the
+     * cross-sectional mean of the pre-time-demeaned residual at time t.
+     * In a balanced panel, the recovered effects are mean-zero over time.
+     */
+    timeeff = J(TT,1,0)
+
+    if (timefe==1) {
+        for (tpos=1; tpos<=TT; tpos++) {
+            idx = selectindex(tt :== tpos)
+            timeeff[tpos] = mean(YcPre[idx,.] - Dpre[idx,.]*theta)
+        }
+    }
 
     /*
      * Descriptive within R-squared:
@@ -500,6 +554,7 @@ void hscc__estimate(
     st_matrix("HSCC_B",BHSCC)
     st_matrix("HSCC_V",Vhs)
     st_matrix("HSCC_MG",BMG)
+    st_matrix("HSCC_TIMEFE",timeeff')
 
     st_numscalar("HSCC_HETTRACE",trace(Seta))
     st_numscalar("HSCC_R2W",r2w)
