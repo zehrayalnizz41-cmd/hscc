@@ -247,6 +247,6 @@ The repository URL/DOI and associated manuscript citation will be added after pu
 
 This project is released under the **MIT License**.
 
-Copyright © 2026 **Dr. Zehra Yalnız 
+Copyright © 2026 **Dr. Zehra Yalnız**
 
 See the `LICENSE` file in the repository for the full license text.
