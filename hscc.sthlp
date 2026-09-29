@@ -32,7 +32,8 @@ by time and a Bartlett Driscoll-Kraay HAC estimator.
 Version 1.0.2 adds the optional {cmd:timefe} specification. When requested,
 common time effects are partialled out from the complete joint HSCC design.
 These time effects are treated as common nuisance components and are kept
-outside the heterogeneous-slope and penalty blocks.
+outside the heterogeneous-slope and penalty blocks. Recovered centered common
+time effects are displayed and stored in {cmd:e(timefe_b)}.
 
 {pstd}
 The data must be {cmd:xtset} before estimation. Version 1.0.2 requires a
@@ -68,7 +69,7 @@ y_it = alpha_i + lambda_t + x_it'beta_i + u_it,
 {pstd}
 where lambda_t denotes the common time effect. The time effects are partialled
 out using an FWL-equivalent transformation and are not treated as heterogeneous
-slope parameters.
+slope parameters. Reported time effects use a centered mean-zero normalization.
 
 
 {title:Options}
@@ -86,6 +87,7 @@ with a minimum of 1.
 {opt timefe} adds common time fixed effects by partialling them out from the
 complete joint HSCC design. Time effects are treated as common nuisance
 components and are kept outside the heterogeneous-slope and penalty blocks.
+Recovered centered common time effects are stored in {cmd:e(timefe_b)}.
 
 
 {title:Examples}
@@ -106,7 +108,7 @@ components and are kept outside the heterogeneous-slope and penalty blocks.
 {pstd}
 {cmd:hscc} stores the following in {cmd:e()}:
 
-{synoptset 24 tabbed}{...}
+{synoptset 26 tabbed}{...}
 {synopt:{cmd:e(b)}}HSCC central slope estimates{p_end}
 {synopt:{cmd:e(V)}}HC3 Driscoll-Kraay covariance matrix{p_end}
 {synopt:{cmd:e(N)}}number of observations{p_end}
@@ -115,9 +117,11 @@ components and are kept outside the heterogeneous-slope and penalty blocks.
 {synopt:{cmd:e(lag)}}DK/HAC lag{p_end}
 {synopt:{cmd:e(df_r)}}T-1 degrees of freedom used for inference{p_end}
 {synopt:{cmd:e(heterogeneity_trace)}}trace of the estimated residual slope covariance{p_end}
-{synopt:{cmd:e(r2_w)}}descriptive within R-squared, 1-SSE/SST on the transformed HSCC system{p_end}
+{synopt:{cmd:e(r2_w)}}descriptive HSCC within R-squared{p_end}
 {synopt:{cmd:e(mg_b)}}conventional mean-group point-estimate benchmark{p_end}
 {synopt:{cmd:e(timefe)}}nonempty when common time fixed effects are requested{p_end}
+{synopt:{cmd:e(timefe_b)}}recovered centered common time effects when {cmd:timefe} is used{p_end}
+{synopt:{cmd:e(timefe_normalization)}}normalization used for recovered time effects{p_end}
 
 
 {title:Remarks}
